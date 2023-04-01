@@ -78,6 +78,22 @@ void mp_input_src_init_done(struct mp_input_src *src);
 // Feed text data, which will be split into lines of commands.
 void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
 
+//BY MONSTERDUTY.
+//this check the key pressed history of the input context
+//and return true if there's at least one key available.
+bool mp_input_key_was_pressed( struct input_ctx *ictx);
+
+//BY MONSTERDUTY.
+//this return if a key was pressed, The number 0 represent
+//that there's no key pressed in the structure, any
+//other value is taken as true.
+int *mp_input_get_key_pressed_history( struct input_ctx *ictx );
+
+//BY MONSTERDUTY.
+//As the name suggens, this return the value of the macro MP_MAX_KEY_DOWN
+//defined in the inplementation file of this header.
+int mp_input_get_MAX_KEY_DOWN( void );
+
 // Process keyboard input. code is a key code from keycodes.h, possibly
 // with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
 void mp_input_put_key(struct input_ctx *ictx, int code);

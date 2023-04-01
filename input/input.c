@@ -17,6 +17,7 @@
 
 #include "config.h"
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -115,6 +116,12 @@ struct input_ctx {
     // key code of the last key that triggered MP_KEY_STATE_DOWN
     int last_key_down;
     int64_t last_key_down_time;
+    int64_t last_Key_press; //this is only to report a key press event,
+    //this history is only used by key-press property.
+    //The diference with the history of above, it that this
+    //history is meant to be wipe whenever the user stop pressing keys.
+    int key_press_history[MP_MAX_KEY_DOWN];
+
     struct mp_cmd *current_down_cmd;
 
     int last_doubleclick_key_down;
@@ -528,6 +535,7 @@ static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
     if (ictx->current_down_cmd && ictx->current_down_cmd->emit_on_up &&
         (!drop_current || ictx->current_down_cmd->def->on_updown))
     {
+        printf("deleting key history\n");
         memset(ictx->key_history, 0, sizeof(ictx->key_history));
         ictx->current_down_cmd->is_up = true;
         mp_input_queue_cmd(ictx, ictx->current_down_cmd);
@@ -554,6 +562,7 @@ static struct mp_cmd *resolve_key(struct input_ctx *ictx, int code)
     update_mouse_section(ictx);
     struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, code);
     key_buf_add(ictx->key_history, code);
+    key_buf_add(ictx->key_press_history, code); // for key-press property.
     if (cmd && !cmd->def->is_ignore && !should_drop_cmd(ictx, cmd))
         return cmd;
     talloc_free(cmd);
@@ -707,6 +716,23 @@ static bool process_wheel(struct input_ctx *ictx, int code, double *scale,
     return true;
 }
 
+bool mp_input_key_was_pressed( struct input_ctx *ictx)
+{
+    return ictx->key_press_history[0] ? true : false;
+}
+
+int *mp_input_get_key_pressed_history( struct input_ctx *ictx )
+{
+    if ( ictx->last_Key_press == 0 )
+        memset(ictx->key_press_history, 0, sizeof(ictx->key_press_history));
+    return ictx->key_press_history;
+}
+
+int mp_input_get_MAX_KEY_DOWN()
+{
+    return MP_MAX_KEY_DOWN;
+}
+
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
                               bool force_mouse)
 {
@@ -717,6 +743,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_TRACE(ictx, "release all\n");
         release_down_cmd(ictx, false);
+        ictx->last_Key_press = 0;
         return;
     }
     if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod) && !force_mouse)
@@ -731,6 +758,13 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
         mp_input_queue_cmd(ictx, cmd);
         return;
     }
+
+    //in order to get a key press event for the user of libmpv
+    //we get the last key "PRESSED" from here.
+    //We not get any key up event or something like that.
+    //This value must be treated as a character.
+    ictx->last_Key_press = strtol( mp_input_get_key_name(code), NULL, 16 );
+
     double now = mp_time_sec();
     // ignore system-doubleclick if we generate these events ourselves
     if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))

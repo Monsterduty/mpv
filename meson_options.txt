@@ -1,7 +1,7 @@
 # booleans
 option('gpl', type: 'boolean', value: true, description: 'GPL (version 2 or later) build')
-option('cplayer', type: 'boolean', value: true, description: 'mpv CLI player')
-option('libmpv', type: 'boolean', value: false, description: 'libmpv library')
+option('cplayer', type: 'boolean', value: false, description: 'mpv CLI player')
+option('libmpv', type: 'boolean', value: true, description: 'libmpv library')
 option('build-date', type: 'boolean', value: true, description: 'whether to include binary compile time')
 option('tests', type: 'boolean', value: false, description: 'meson unit tests')
 # Reminder: normally always built, but enabled by MPV_LEAK_REPORT.
@@ -92,7 +92,7 @@ option('vaapi-x-egl', type: 'feature', value: 'auto', description: 'VAAPI EGL on
 option('vulkan', type: 'feature', value: 'auto', description: 'Vulkan context support')
 option('wayland', type: 'feature', value: 'auto', description: 'Wayland')
 option('x11', type: 'feature', value: 'auto', description: 'X11')
-option('xv', type: 'feature', value: 'auto', description: 'Xv video output')
+option('xv', type: 'feature', value: 'enabled', description: 'Xv video output')
 
 # hwaccel features
 option('android-media-ndk', type: 'feature', value: 'auto', description: 'Android Media APIs')

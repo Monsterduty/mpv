@@ -20,10 +20,12 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #include "client.h"
 #include "command.h"
 #include "core.h"
+#include "libmpv/client.h"
 #include "mpv_talloc.h"
 #include "screenshot.h"
 
@@ -109,6 +111,7 @@ void mp_core_unlock(struct MPContext *mpctx)
 // Process any queued user input.
 static void mp_process_input(struct MPContext *mpctx)
 {
+    //this is for mouse events.
     int processed = 0;
     for (;;) {
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
@@ -120,6 +123,13 @@ static void mp_process_input(struct MPContext *mpctx)
     mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
     if (processed)
         mp_notify(mpctx, MP_EVENT_INPUT_PROCESSED, NULL);
+
+    //this is for keyboard events.
+    if ( mp_input_key_was_pressed(mpctx->input) )
+    {
+        mp_client_property_change(mpctx, "key-press");
+        mp_notify( mpctx, MP_EVENT_KEYBOARD_INPUT_PROCESSED, NULL );
+    }
 }
 
 double get_relative_time(struct MPContext *mpctx)

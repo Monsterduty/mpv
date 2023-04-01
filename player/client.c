@@ -15,6 +15,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -1748,7 +1749,9 @@ static void send_client_property_changes(struct mpv_handle *ctx)
     }
 
     if (ctx->destroying || ctx->new_property_events)
+    {
         wakeup_client(ctx);
+    }
 }
 
 void mp_client_send_property_changes(struct MPContext *mpctx)

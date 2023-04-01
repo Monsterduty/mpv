@@ -16,6 +16,8 @@
  */
 
 #include <float.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include <unistd.h>
@@ -31,6 +33,7 @@
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
 
+#include "libmpv/client.h"
 #include "mpv_talloc.h"
 #include "client.h"
 #include "common/av_common.h"
@@ -2715,6 +2718,61 @@ static int mp_property_mouse_pos(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_key_press(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    switch (action){
+        case M_PROPERTY_GET_TYPE:
+            *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+            return M_PROPERTY_OK;
+
+        case M_PROPERTY_GET:{
+            MPContext *mpctx = ctx;
+            struct mpv_node node;
+            int *key = mp_input_get_key_pressed_history(mpctx->input);
+
+            node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
+
+            for ( int i = 0; i < mp_input_get_MAX_KEY_DOWN(); i++ )
+            {
+                if ( key[i] == 0 )
+                    break;
+
+                switch (key[i]) {
+                    case MP_KEY_DEL:
+                         node_map_add_int64(&node, "key", 127);
+                         break;
+                    case MP_KEY_ESC:
+                         node_map_add_int64(&node, "key", 27 );
+                         break;
+                    case MP_KEY_LEFT:
+                         node_map_add_int64(&node, "key", 20);
+                         break;
+                    case MP_KEY_RIGHT:
+                         node_map_add_int64(&node, "key", 19);
+                         break;
+                    case MP_KEY_DOWN:
+                         node_map_add_int64(&node, "key", 18);
+                         break;
+                    case MP_KEY_UP:
+                        node_map_add_int64(&node, "key", 17);
+                        break;
+                    case MP_KEY_BACKSPACE:
+                        node_map_add_int64(&node, "key", 8);
+                        break;
+                    default:
+                        node_map_add_int64(&node, "key", key[i] );
+                }
+            }
+            *(struct mpv_node *)arg = node;
+
+            return M_PROPERTY_OK;
+        }
+    }
+
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Video fps (RO)
 static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -3877,6 +3935,8 @@ static const struct m_property mp_properties_base[] = {
 
     {"mouse-pos", mp_property_mouse_pos},
 
+    {"key-press", mp_property_key_press},
+
     // Subs
     {"sid", property_switch_track, .priv = (void *)(const int[]){0, STREAM_SUB}},
     {"secondary-sid", property_switch_track,
@@ -4009,6 +4069,7 @@ static const char *const *const mp_event_property_change[] = {
       "playlist-playing-pos"),
     E(MP_EVENT_INPUT_PROCESSED, "mouse-pos"),
     E(MP_EVENT_CORE_IDLE, "core-idle", "eof-reached"),
+    E(MP_EVENT_KEYBOARD_INPUT_PROCESSED, "key-press")
 };
 #undef E
 
