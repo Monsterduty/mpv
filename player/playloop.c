@@ -111,7 +111,7 @@ void mp_core_unlock(struct MPContext *mpctx)
 // Process any queued user input.
 static void mp_process_input(struct MPContext *mpctx)
 {
-    //this is for mouse events.
+    //This is for mouse events.
     int processed = 0;
     for (;;) {
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
@@ -124,7 +124,7 @@ static void mp_process_input(struct MPContext *mpctx)
     if (processed)
         mp_notify(mpctx, MP_EVENT_INPUT_PROCESSED, NULL);
 
-    //this is for keyboard events.
+    //This is for keyboard events.
     if ( mp_input_key_was_pressed(mpctx->input) )
     {
         mp_client_property_change(mpctx, "key-press");

@@ -84,9 +84,9 @@ void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len)
 bool mp_input_key_was_pressed( struct input_ctx *ictx);
 
 //BY MONSTERDUTY.
-//this return if a key was pressed, The number 0 represent
-//that there's no key pressed in the structure, any
-//other value is taken as true.
+//This return the keys pressed history from the input context.
+//In the case that the last key pressed is 0 "key up", this
+//will first clear the history and return an empty history.
 int *mp_input_get_key_pressed_history( struct input_ctx *ictx );
 
 //BY MONSTERDUTY.

@@ -2729,6 +2729,8 @@ static int mp_property_key_press(void *ctx, struct m_property *prop,
         case M_PROPERTY_GET:{
             MPContext *mpctx = ctx;
             struct mpv_node node;
+
+            //getting the history of keys pressed.
             int *key = mp_input_get_key_pressed_history(mpctx->input);
 
             node_init(&node, MPV_FORMAT_NODE_MAP, NULL);
@@ -2738,6 +2740,7 @@ static int mp_property_key_press(void *ctx, struct m_property *prop,
                 if ( key[i] == 0 )
                     break;
 
+                //Normalizing some key codes with it's ascii value.
                 switch (key[i]) {
                     case MP_KEY_DEL:
                          node_map_add_int64(&node, "key", 127);
@@ -2764,6 +2767,7 @@ static int mp_property_key_press(void *ctx, struct m_property *prop,
                         node_map_add_int64(&node, "key", key[i] );
                 }
             }
+            //Giving the data recolected to the arg pointer.
             *(struct mpv_node *)arg = node;
 
             return M_PROPERTY_OK;

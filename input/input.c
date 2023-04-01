@@ -723,6 +723,7 @@ bool mp_input_key_was_pressed( struct input_ctx *ictx)
 
 int *mp_input_get_key_pressed_history( struct input_ctx *ictx )
 {
+    //clear history if the last key is 0.
     if ( ictx->last_Key_press == 0 )
         memset(ictx->key_press_history, 0, sizeof(ictx->key_press_history));
     return ictx->key_press_history;
@@ -743,6 +744,9 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_TRACE(ictx, "release all\n");
         release_down_cmd(ictx, false);
+
+        //This is to know when the user stop pressing keys.
+        //Used by "key-press" property.
         ictx->last_Key_press = 0;
         return;
     }
@@ -759,10 +763,9 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
         return;
     }
 
-    //in order to get a key press event for the user of libmpv
+    //in order to get a key press event for the "key-press" property
     //we get the last key "PRESSED" from here.
-    //We not get any key up event or something like that.
-    //This value must be treated as a character.
+    //This value is saved as an integer.
     ictx->last_Key_press = strtol( mp_input_get_key_name(code), NULL, 16 );
 
     double now = mp_time_sec();
