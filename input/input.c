@@ -729,6 +729,19 @@ int *mp_input_get_key_pressed_history( struct input_ctx *ictx )
     return ictx->key_press_history;
 }
 
+void mp_input_delete_key_pressed_history( struct input_ctx *ictx )
+{
+    memset( ictx->key_press_history, 0, sizeof(ictx->key_press_history) );
+}
+
+void mp_input_remove_key_pressed_repeated( struct input_ctx *ictx )
+{
+    for ( int i = 0; i < MP_MAX_KEY_DOWN; i++ )
+        for ( int c = i+1; c < MP_MAX_KEY_DOWN; c++ )
+            if ( ictx->key_press_history[i] == ictx->key_press_history[c] )
+                ictx->key_press_history[c] = 0;
+}
+
 int mp_input_get_MAX_KEY_DOWN()
 {
     return MP_MAX_KEY_DOWN;
@@ -738,7 +751,6 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
                               bool force_mouse)
 {
     struct input_opts *opts = ictx->opts;
-
     code = mp_normalize_keycode(code);
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (code == MP_INPUT_RELEASE_ALL) {
@@ -767,6 +779,9 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     //we get the last key "PRESSED" from here.
     //This value is saved as an integer.
     ictx->last_Key_press = strtol( mp_input_get_key_name(code), NULL, 16 );
+    //this is to detect mouse key up state.
+    if ( ictx->last_Key_press >= 551551136 /*551551138 551551139 551551140 551551141*/ && ictx->last_Key_press <= 551551142 )
+        ictx->key_press_history[0] = ictx->last_Key_press;
 
     double now = mp_time_sec();
     // ignore system-doubleclick if we generate these events ourselves

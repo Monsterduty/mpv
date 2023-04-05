@@ -2737,34 +2737,65 @@ static int mp_property_key_press(void *ctx, struct m_property *prop,
 
             for ( int i = 0; i < mp_input_get_MAX_KEY_DOWN(); i++ )
             {
-                if ( key[i] == 0 )
+                if ( key[i] == 0 || (key[i] > 551551135 && key[i] < 551551143) )
                     break;
+                char identifier[5] = "KEY_";
+                identifier[4] =  '1' + i;
 
                 //Normalizing some key codes with it's ascii value.
                 switch (key[i]) {
+                    case MP_MBTN_LEFT: //mouse single click.
+                        node_map_add_int64(&node, "mouse", 1);
+                        break;
+                    case MP_MBTN_RIGHT:
+                        node_map_add_int64(&node, "mouse", 0);
+                        break;
+                    case MP_MBTN_RIGHT_DBL:
+                        node_map_add_int64(&node, "mouse", 12);
+                        break;
+                    case MP_MBTN_LEFT_DBL: //mouse double click.
+                        node_map_add_int64(&node, "mouse", 11);
+                        mp_input_delete_key_pressed_history(mpctx->input);
+                        break;
+                    // case MP_WHEEL_UP:
+                    //     node_map_add_int64(&node, "mouse_wheel_up", 1);
+                    //     mp_input_remove_key_pressed_repeated(mpctx->input);
+                    //     break;
+                    // case MP_WHEEL_DOWN:
+                    //     node_map_add_int64(&node, "mouse_wheel_down", 0);
+                    //     // mp_input_delete_key_pressed_history(mpctx->input);
+                    //     break;
+                    // case MP_WHEEL_LEFT:
+                    //     node_map_add_int64(&node, "mouse_wheel_left", 2);
+                    //     // mp_input_delete_key_pressed_history(mpctx->input);
+                    //     break;
+                    // case MP_WHEEL_RIGHT:
+                    //     node_map_add_int64(&node, "mouse_wheel_right", 3);
+                    //     // mp_input_delete_key_pressed_history(mpctx->input);
+                    //     break;
                     case MP_KEY_DEL:
-                         node_map_add_int64(&node, "key", 127);
+                         node_map_add_int64(&node, identifier, 127);
                          break;
                     case MP_KEY_ESC:
-                         node_map_add_int64(&node, "key", 27 );
+                         node_map_add_int64(&node, identifier, 27 );
                          break;
                     case MP_KEY_LEFT:
-                         node_map_add_int64(&node, "key", 20);
+                         node_map_add_int64(&node, identifier, 20);
                          break;
                     case MP_KEY_RIGHT:
-                         node_map_add_int64(&node, "key", 19);
+                         node_map_add_int64(&node, identifier, 19);
                          break;
                     case MP_KEY_DOWN:
-                         node_map_add_int64(&node, "key", 18);
+                         node_map_add_int64(&node, identifier, 18);
                          break;
                     case MP_KEY_UP:
-                        node_map_add_int64(&node, "key", 17);
+                        node_map_add_int64(&node, identifier, 17);
                         break;
                     case MP_KEY_BACKSPACE:
-                        node_map_add_int64(&node, "key", 8);
+                        node_map_add_int64(&node, identifier, 8);
                         break;
                     default:
-                        node_map_add_int64(&node, "key", key[i] );
+                        node_map_add_int64(&node, identifier, key[i] );
                 }
             }
             //Giving the data recolected to the arg pointer.

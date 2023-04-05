@@ -90,6 +90,14 @@ bool mp_input_key_was_pressed( struct input_ctx *ictx);
 int *mp_input_get_key_pressed_history( struct input_ctx *ictx );
 
 //BY MONSTERDUTY.
+//Delete the key pressed history from the input context.
+void mp_input_delete_key_pressed_history( struct input_ctx *ictx );
+
+//BY MONSTERDUTY.
+//Make sure that none key is repeated in the history.
+void mp_input_remove_key_pressed_repeated( struct input_ctx *ictx );
+
+//BY MONSTERDUTY.
 //As the name suggens, this return the value of the macro MP_MAX_KEY_DOWN
 //defined in the inplementation file of this header.
 int mp_input_get_MAX_KEY_DOWN( void );
